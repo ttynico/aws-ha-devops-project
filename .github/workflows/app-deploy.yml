@@ -1,0 +1,62 @@
+name: App Deploy
+
+# Runs after App CI succeeds on main: packages the Flask app, uploads
+# it to the S3 artifact bucket, then triggers a rolling EC2 instance
+# refresh so running instances pick up the new code with zero downtime
+# (the ASG replaces instances gradually while the ALB keeps routing
+# traffic to the ones still healthy).
+on:
+  workflow_run:
+    workflows: ["App CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC - no static keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package app
+        working-directory: app
+        run: zip -r ../app.zip . -x "test_app.py" "requirements-dev.txt"
+
+      - name: Upload artifact to S3
+        run: aws s3 cp app.zip s3://${{ vars.ARTIFACT_BUCKET }}/app.zip
+
+      - name: Trigger rolling instance refresh
+        run: |
+          aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name "${{ vars.ASG_NAME }}" \
+            --preferences '{"MinHealthyPercentage":50,"InstanceWarmup":60}'
+
+      - name: Wait for instance refresh to finish
+        run: |
+          STATUS="Pending"
+          while [[ "$STATUS" == "Pending" || "$STATUS" == "InProgress" ]]; do
+            sleep 20
+            STATUS=$(aws autoscaling describe-instance-refreshes \
+              --auto-scaling-group-name "${{ vars.ASG_NAME }}" \
+              --max-records 1 --query "InstanceRefreshes[0].Status" --output text)
+            echo "Instance refresh status: $STATUS"
+          done
+          if [[ "$STATUS" != "Successful" ]]; then
+            echo "Instance refresh did not succeed (status: $STATUS)"
+            exit 1
+          fi

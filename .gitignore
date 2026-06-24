@@ -1,0 +1,29 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+!terraform.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# Note: .terraform.lock.hcl is intentionally NOT ignored - commit it
+# so everyone (and CI) resolves the exact same provider versions.
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+.venv/
+
+# App build artifact
+app.zip
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

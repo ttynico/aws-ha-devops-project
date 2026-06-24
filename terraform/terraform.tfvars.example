@@ -1,0 +1,22 @@
+# Copy this file to terraform.tfvars and fill in your own values.
+# terraform.tfvars is gitignored - never commit real values that are
+# environment-specific or sensitive.
+
+project_name = "ha-app"
+environment  = "dev"
+aws_region   = "us-east-1"
+
+# Set to true while learning / to save on NAT Gateway cost.
+# Set to false for full multi-AZ NAT high availability.
+single_nat_gateway = true
+
+instance_type     = "t3.micro"
+min_size          = 2
+max_size          = 4
+desired_capacity  = 2
+
+# Leave blank for HTTP-only until you have a domain + ACM cert.
+certificate_arn = ""
+
+# Get CloudWatch alarm emails (optional).
+alert_email = "you@example.com"
