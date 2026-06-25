@@ -19,6 +19,8 @@ permissions:
 env:
   AWS_REGION: us-east-1
   TF_WORKING_DIR: terraform
+  TF_VAR_single_nat_gateway: ${{ vars.TF_VAR_single_nat_gateway }}
+  TF_VAR_alert_email: ${{ vars.TF_VAR_alert_email }}
 
 jobs:
   plan:

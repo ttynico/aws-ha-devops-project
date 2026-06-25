@@ -32,6 +32,7 @@
         "s3:GetAccelerateConfiguration",
         "s3:GetBucketRequestPayment",
         "s3:GetBucketWebsite",
+        "s3:GetBucketTagging",
         "s3:PutBucketVersioning",
         "s3:GetBucketPolicy",
         "s3:PutBucketPolicy",
