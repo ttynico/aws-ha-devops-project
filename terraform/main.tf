@@ -8,31 +8,32 @@ module "network" {
   source = "./modules/network"
 
   project_name         = var.project_name
-  vpc_cidr              = var.vpc_cidr
-  public_subnet_cidrs   = var.public_subnet_cidrs
-  private_subnet_cidrs  = var.private_subnet_cidrs
-  single_nat_gateway    = var.single_nat_gateway
+  vpc_cidr             = var.vpc_cidr
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  private_subnet_cidrs = var.private_subnet_cidrs
+  single_nat_gateway   = var.single_nat_gateway
 }
 
 module "security" {
   source = "./modules/security"
 
-  project_name = var.project_name
-  vpc_id       = module.network.vpc_id
-  app_port     = var.app_port
+  project_name         = var.project_name
+  vpc_id               = module.network.vpc_id
+  app_port             = var.app_port
+  artifact_bucket_name = aws_s3_bucket.artifacts.bucket
 }
 
 module "loadbalancer" {
   source = "./modules/loadbalancer"
 
-  project_name        = var.project_name
-  vpc_id              = module.network.vpc_id
-  public_subnet_ids   = module.network.public_subnet_ids
-  alb_sg_id           = module.security.alb_sg_id
-  app_port            = var.app_port
-  health_check_path   = var.health_check_path
-  certificate_arn     = var.certificate_arn
-  access_logs_bucket  = aws_s3_bucket.alb_logs.bucket
+  project_name       = var.project_name
+  vpc_id             = module.network.vpc_id
+  public_subnet_ids  = module.network.public_subnet_ids
+  alb_sg_id          = module.security.alb_sg_id
+  app_port           = var.app_port
+  health_check_path  = var.health_check_path
+  certificate_arn    = var.certificate_arn
+  access_logs_bucket = aws_s3_bucket.alb_logs.bucket
 
   # The ALB log-delivery account needs the bucket policy in place
   # *before* the ALB is created with access logging enabled, or the
@@ -44,19 +45,19 @@ module "loadbalancer" {
 module "compute" {
   source = "./modules/compute"
 
-  project_name               = var.project_name
-  aws_region                 = var.aws_region
-  private_subnet_ids         = module.network.private_subnet_ids
-  app_sg_id                  = module.security.app_sg_id
-  ec2_instance_profile_name  = module.security.ec2_instance_profile_name
-  target_group_arn           = module.loadbalancer.target_group_arn
-  instance_type              = var.instance_type
-  app_port                   = var.app_port
-  min_size                   = var.min_size
-  max_size                   = var.max_size
-  desired_capacity           = var.desired_capacity
-  artifact_bucket            = aws_s3_bucket.artifacts.bucket
-  artifact_key               = var.artifact_key
+  project_name              = var.project_name
+  aws_region                = var.aws_region
+  private_subnet_ids        = module.network.private_subnet_ids
+  app_sg_id                 = module.security.app_sg_id
+  ec2_instance_profile_name = module.security.ec2_instance_profile_name
+  target_group_arn          = module.loadbalancer.target_group_arn
+  instance_type             = var.instance_type
+  app_port                  = var.app_port
+  min_size                  = var.min_size
+  max_size                  = var.max_size
+  desired_capacity          = var.desired_capacity
+  artifact_bucket           = aws_s3_bucket.artifacts.bucket
+  artifact_key              = var.artifact_key
 }
 
 # ---------- S3 bucket for app deployment artifacts ----------

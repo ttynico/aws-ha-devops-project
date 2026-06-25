@@ -57,8 +57,8 @@ resource "aws_lb_target_group" "app" {
 # to HTTPS (see the HTTPS listener below).
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
-  port               = 80
-  protocol           = "HTTP"
+  port              = 80
+  protocol          = "HTTP"
 
   dynamic "default_action" {
     for_each = var.certificate_arn == "" ? [1] : []

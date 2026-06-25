@@ -107,3 +107,21 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   name = "${var.project_name}-ec2-instance-profile"
   role = aws_iam_role.ec2_role.name
 }
+
+# Allows EC2 instances to download the app artifact at boot
+data "aws_iam_policy_document" "s3_artifact_read" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["arn:aws:s3:::${var.artifact_bucket_name}/*"]
+  }
+  statement {
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${var.artifact_bucket_name}"]
+  }
+}
+
+resource "aws_iam_role_policy" "s3_artifact_read" {
+  name   = "${var.project_name}-s3-artifact-read"
+  role   = aws_iam_role.ec2_role.id
+  policy = data.aws_iam_policy_document.s3_artifact_read.json
+}

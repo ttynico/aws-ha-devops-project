@@ -13,3 +13,8 @@ variable "app_port" {
   type        = number
   default     = 5000
 }
+
+variable "artifact_bucket_name" {
+  description = "Name of the S3 bucket containing the app deployment artifact"
+  type        = string
+}

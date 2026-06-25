@@ -36,7 +36,7 @@ resource "aws_launch_template" "app" {
   # inbound ports, no key-pair sprawl) per the IAM role attached above.
 
   metadata_options {
-    http_tokens                = "required" # enforce IMDSv2
+    http_tokens                 = "required" # enforce IMDSv2
     http_put_response_hop_limit = 2
   }
 
@@ -44,9 +44,9 @@ resource "aws_launch_template" "app" {
     device_name = "/dev/xvda"
     ebs {
       volume_size           = 20
-      volume_type            = "gp3"
-      encrypted              = true
-      delete_on_termination  = true
+      volume_type           = "gp3"
+      encrypted             = true
+      delete_on_termination = true
     }
   }
 
