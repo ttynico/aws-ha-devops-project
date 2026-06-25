@@ -9,7 +9,7 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     return jsonify(
-        message="Hello from the highly available Flask app!",
+        message="Hello from my highly available Flask app, deployed via CI/CD!",
         served_by=socket.gethostname(),
     )
 
